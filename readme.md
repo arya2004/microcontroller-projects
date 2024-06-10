@@ -1,4 +1,4 @@
-# ESP32/Arduino Codes
+# Microcontroller Project
 
 This repository contains a collection of ESP32/Arduino codes. These codes are designed to work with the ESP32 microcontroller and utilize the Arduino framework. They provide examples, projects, and libraries that demonstrate the capabilities and functionalities of the ESP32 platform.
 
@@ -20,7 +20,7 @@ To get started with the ESP32/Arduino codes in this repository, follow these ste
 
 1. Clone the repository to your local machine.
    ```shell
-   git clone https://github.com/arya2004/Arduino-ESP32-codes.git
+   git clone https://github.com/arya2004/microcontroller-projects.git
    ```
 2. Set up the Arduino IDE for ESP32 development. Refer to the official documentation for detailed instructions on installing the necessary tools and libraries: [ESP32 Arduino Core](https://docs.espressif.com/projects/arduino-esp32/en/latest/).
 3. Open the Arduino IDE and navigate to the cloned repository directory.
