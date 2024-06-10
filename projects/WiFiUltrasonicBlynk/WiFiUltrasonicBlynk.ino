@@ -1,30 +1,51 @@
-#  include <WiFi.h>
+/*
+  WiFiUltrasonicBlynk.ino
+  Description: This code uses an ESP32 to measure distance with an ultrasonic sensor,
+  connect to a WiFi network, and send data to the Blynk cloud server if the distance
+  is below a certain threshold.
 
+  Hardware setup:
+  - Ultrasonic sensor connected to pins 5 (Trig) and 18 (Echo) of the ESP32.
+  - The WiFi credentials and Blynk authentication token need to be defined.
+
+  Blynk setup:
+  - BLYNK_TEMPLATE_ID: your Blynk template ID.
+  - BLYNK_TEMPLATE_NAME: your Blynk template name.
+  - BLYNK_AUTH_TOKEN: your Blynk authentication token.
+
+  Circuit:
+  - Ultrasonic sensor Trig pin to ESP32 pin 5
+  - Ultrasonic sensor Echo pin to ESP32 pin 18
+*/
+
+#include <WiFi.h>
+
+// Blynk credentials and WiFi settings
 #define BLYNK_TEMPLATE_ID ""
 #define BLYNK_TEMPLATE_NAME ""
 #define BLYNK_AUTH_TOKEN ""
-
-// Network settings
 const char ssid[] = "";
 const char pass[] = "";
 
-// Blynk cloud server
+// Blynk cloud server settings
 const char* host = "blynk.cloud";
 unsigned int port = 80;
 
 WiFiClient client;
+
+// Ultrasonic sensor pins
 const int trigPin = 5;
 const int echoPin = 18;
 
-//define sound speed in cm/uS
+// Define sound speed in cm/us
 #define SOUND_SPEED 0.034
 
+// Variables to store sensor data
 long duration;
 float distance;
 
-// Start the WiFi connection
-void connectNetwork()
-{
+// Function to connect to WiFi
+void connectNetwork() {
   Serial.print("Connecting to ");
   Serial.println(ssid);
   WiFi.begin(ssid, pass);
@@ -38,11 +59,8 @@ void connectNetwork()
   Serial.println("WiFi connected");
 }
 
-bool httpRequest(const String& method,
-                 const String& url,
-                 const String& request,
-                 String&       response)
-{
+// Function to send HTTP requests
+bool httpRequest(const String& method, const String& url, const String& request, String& response) {
   Serial.print(F("Connecting to "));
   Serial.print(host);
   Serial.print(":");
@@ -55,22 +73,27 @@ bool httpRequest(const String& method,
     return false;
   }
 
-  Serial.print(method); Serial.print(" "); Serial.println(url);
+  Serial.print(method); 
+  Serial.print(" "); 
+  Serial.println(url);
 
-  client.print(method); client.print(" ");
-  client.print(url); client.println(F(" HTTP/1.1"));
-  client.print(F("Host: ")); client.println(host);
+  client.print(method); 
+  client.print(" ");
+  client.print(url); 
+  client.println(F(" HTTP/1.1"));
+  client.print(F("Host: ")); 
+  client.println(host);
   client.println(F("Connection: close"));
   if (request.length()) {
     client.println(F("Content-Type: application/json"));
-    client.print(F("Content-Length: ")); client.println(request.length());
+    client.print(F("Content-Length: ")); 
+    client.println(request.length());
     client.println();
     client.print(request);
   } else {
     client.println();
   }
 
-  //Serial.println("Waiting response");
   int timeout = millis() + 5000;
   while (client.available() == 0) {
     if (timeout - millis() < 0) {
@@ -80,7 +103,6 @@ bool httpRequest(const String& method,
     }
   }
 
-  //Serial.println("Reading response");
   int contentLength = -1;
   while (client.available()) {
     String line = client.readStringUntil('\n');
@@ -93,7 +115,6 @@ bool httpRequest(const String& method,
     }
   }
 
-  //Serial.println("Reading response body");
   response = "";
   response.reserve(contentLength + 1);
   while (response.length() < contentLength) {
@@ -108,8 +129,8 @@ bool httpRequest(const String& method,
   return true;
 }
 
-void setup()
-{
+// Setup function runs once at startup
+void setup() {
   Serial.begin(9600);
   pinMode(trigPin, OUTPUT);
   pinMode(echoPin, INPUT); 
@@ -120,6 +141,7 @@ void setup()
   connectNetwork();
 }
 
+// Main loop function runs repeatedly
 void loop() {
   String response;
   digitalWrite(trigPin, LOW);
@@ -128,23 +150,16 @@ void loop() {
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
-  distance = duration * SOUND_SPEED/2;
+  distance = duration * SOUND_SPEED / 2;
   Serial.println(distance);
-    if(distance < 50){
-        if (httpRequest("GET", String("/external/api/update?token=") + BLYNK_AUTH_TOKEN + "&pin=V0&value=" + distance, "", response)) {
-          if (response.length() != 0) {
-          Serial.print("WARNING: ");
-          Serial.println(response);
-          }
-        }
-        delay(1000L);
+  if (distance < 50) {
+    if (httpRequest("GET", String("/external/api/update?token=") + BLYNK_AUTH_TOKEN + "&pin=V0&value=" + distance, "", response)) {
+      if (response.length() != 0) {
+        Serial.print("WARNING: ");
+        Serial.println(response);
+      }
     }
-  delay(50L);
+    delay(1000);
+  }
+  delay(50);
 }
-
-
-
-
-
-
-
