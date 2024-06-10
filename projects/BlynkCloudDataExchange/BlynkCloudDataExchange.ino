@@ -1,22 +1,19 @@
 /*************************************************************
-  Blynk is a platform with iOS and Android apps to control
-  ESP32, Arduino, Raspberry Pi and the likes over the Internet.
-  You can easily build mobile and web interfaces for any
-  projects by simply dragging and dropping widgets.
+  BlynkCloudDataExchange.ino
+  Description: This code demonstrates how to exchange data with Blynk Cloud using HTTP requests. It sends data to the cloud and reads it back periodically.
 
+  App dashboard setup:
+    Value Display widget on V2
+
+  Blynk platform:
     Downloads, docs, tutorials: https://www.blynk.io
     Sketch generator:           https://examples.blynk.cc
     Blynk community:            https://community.blynk.cc
     Follow us:                  https://www.fb.com/blynkapp
                                 https://twitter.com/blynk_app
 
-  This example code is in public domain.
-
- *************************************************************
-  App dashboard setup:
-    Value Display widget on V2
-
- *************************************************************/
+  This example code is in the public domain.
+*************************************************************/
 
 #ifdef ESP32
 #  include <WiFi.h>
@@ -24,13 +21,11 @@
 #  include <ESP8266WiFi.h>
 #endif
 
-/* Fill in information from Blynk Device Info here */
-//#define BLYNK_TEMPLATE_ID           "TMPxxxxxx"
-//#define BLYNK_TEMPLATE_NAME         "Device"
-//#define BLYNK_AUTH_TOKEN            "YourAuthToken"
+/* Fill in Blynk Device Info */
 #define BLYNK_TEMPLATE_ID "1"
 #define BLYNK_TEMPLATE_NAME ""
 #define BLYNK_AUTH_TOKEN ""
+
 // Network settings
 const char ssid[] = "";
 const char pass[] = "";
@@ -57,6 +52,7 @@ void connectNetwork()
   Serial.println("WiFi connected");
 }
 
+// HTTP request function
 bool httpRequest(const String& method,
                  const String& url,
                  const String& request,
@@ -89,7 +85,6 @@ bool httpRequest(const String& method,
     client.println();
   }
 
-  //Serial.println("Waiting response");
   int timeout = millis() + 5000;
   while (client.available() == 0) {
     if (timeout - millis() < 0) {
@@ -99,7 +94,6 @@ bool httpRequest(const String& method,
     }
   }
 
-  //Serial.println("Reading response");
   int contentLength = -1;
   while (client.available()) {
     String line = client.readStringUntil('\n');
@@ -112,7 +106,6 @@ bool httpRequest(const String& method,
     }
   }
 
-  //Serial.println("Reading response body");
   response = "";
   response.reserve(contentLength + 1);
   while (response.length() < contentLength) {
@@ -142,9 +135,6 @@ void loop() {
 
   unsigned long value = millis();
 
-  // Send value to the cloud
-  // similar to Blynk.virtualWrite()
-
   Serial.print("Sending value: ");
   Serial.println(value);
 
@@ -155,13 +145,5 @@ void loop() {
     }
   }
 
-  // Read the value back
-  // similar to Blynk.syncVirtual()
-
-
-  // For more HTTP API, see https://docs.blynk.io/en/blynk.cloud/https-api-overview
-
-  // Wait
-  delay(3000L);
+  delay(3000L); // Wait before sending next request
 }
-
